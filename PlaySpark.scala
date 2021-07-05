@@ -8,9 +8,11 @@ import java.util.Properties
 import scala.language.implicitConversions
 import org.apache.log4j.Logger
 import org.apache.spark.SparkConf
+import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.apache.spark.sql.types._
 import org.apache.spark.sql._
+import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
 
@@ -29,9 +31,11 @@ object PlaySpark extends Serializable {
       .master("local[3]")
       .getOrCreate()
 
-   /* val inputDF= spark.read
+    hemantExercise(spark)
+
+    /*val inputDF= spark.read
       .option("header", "true")
-      .option("inferSchema", "true")
+      .option("inferfSchema", "true")
       .csv("data/products.csv")
 
     val salesDF= spark.read
@@ -43,6 +47,7 @@ object PlaySpark extends Serializable {
       .count()
 
     val filtered_product_group_DF = product_group_DF.where("count > 1")
+
 
     val date_group_DF =  salesDF.groupBy("date").agg(countDistinct(col("product_id")))
 
@@ -191,7 +196,7 @@ object PlaySpark extends Serializable {
 
     // [START] https://jaceklaskowski.github.io/spark-workshop/exercises/sql/Finding-Most-Populated-Cities-Per-Country.html
 
-    val input_city_data= spark.read
+    /*val input_city_data= spark.read
       .option("header", "true")
       .option("inferSchema", "true")
       .csv("data/City_data.csv")
@@ -214,12 +219,12 @@ object PlaySpark extends Serializable {
 
     val output = input_city_data_converted.join(input_city_data_grouped1, joinExpr, joinType)
 
-
+    
 
     output.show()
 
     import scala.io.StdIn.readLine
-    val inp1 = readLine()
+    val inp1 = readLine()*/
 
     // [END] https://jaceklaskowski.github.io/spark-workshop/exercises/sql/Finding-Most-Populated-Cities-Per-Country.html
 
@@ -372,6 +377,138 @@ object PlaySpark extends Serializable {
 
   def callUDF(s:String):String={
        s.toUpperCase()
+  }
+
+  /*
+  def fill(trades, prices):
+    """
+    Combine the sets of events and fill forward the value columns so that each
+    row has the most recent non-null value for the corresponding id. For
+    example, given the above input tables the expected output is:
+
+    +---+-------------+-----+-----+-----+--------+
+    | id|    timestamp|  bid|  ask|price|quantity|
+    +---+-------------+-----+-----+-----+--------+
+    | 10|1546300799000| 37.5|37.51| null|    null|
+    | 10|1546300800000| 37.5|37.51| 37.5|   100.0|
+    | 10|1546300801000| 37.5|37.51|37.51|   100.0|
+    | 10|1546300802000|37.51|37.52|37.51|   100.0|
+    | 20|1546300804000| null| null|12.67|   300.0|
+    | 10|1546300806000| 37.5|37.51|37.51|   100.0|
+    | 10|1546300807000| 37.5|37.51| 37.5|   200.0|
+    +---+-------------+-----+-----+-----+--------+
+
+    :param trades: DataFrame of trade events
+    :param prices: DataFrame of price events
+    :return: A DataFrame of the combined events and filled.
+    """
+    raise NotImplementedError()
+
+
+def pivot(trades, prices):
+    """
+    Pivot and fill the columns on the event id so that each row contains a
+    column for each id + column combination where the value is the most recent
+    non-null value for that id. For example, given the above input tables the
+    expected output is:
+
+    +---+-------------+-----+-----+-----+--------+------+------+--------+-----------+------+------+--------+-----------+
+    | id|    timestamp|  bid|  ask|price|quantity|10_bid|10_ask|10_price|10_quantity|20_bid|20_ask|20_price|20_quantity|
+    +---+-------------+-----+-----+-----+--------+------+------+--------+-----------+------+------+--------+-----------+
+    | 10|1546300799000| 37.5|37.51| null|    null|  37.5| 37.51|    null|       null|  null|  null|    null|       null|
+    | 10|1546300800000| null| null| 37.5|   100.0|  37.5| 37.51|    37.5|      100.0|  null|  null|    null|       null|
+    | 10|1546300801000| null| null|37.51|   100.0|  37.5| 37.51|   37.51|      100.0|  null|  null|    null|       null|
+    | 10|1546300802000|37.51|37.52| null|    null| 37.51| 37.52|   37.51|      100.0|  null|  null|    null|       null|
+    | 20|1546300804000| null| null|12.67|   300.0| 37.51| 37.52|   37.51|      100.0|  null|  null|   12.67|      300.0|
+    | 10|1546300806000| 37.5|37.51| null|    null|  37.5| 37.51|   37.51|      100.0|  null|  null|   12.67|      300.0|
+    | 10|1546300807000| null| null| 37.5|   200.0|  37.5| 37.51|    37.5|      200.0|  null|  null|   12.67|      300.0|
+    +---+-------------+-----+-----+-----+--------+------+------+--------+-----------+------+------+--------+-----------+
+
+    :param trades: DataFrame of trade events
+    :param prices: DataFrame of price events
+    :return: A DataFrame of the combined events and pivoted columns.
+    """
+    raise NotImplementedError()
+  
+  */
+  
+  /*Problem statement given above */
+  def hemantExercise(spark:SparkSession):Unit={
+
+    import spark.implicits._
+
+    val trades = Seq ((10, 1546300800000L, 37.50, 100.000),
+        (10, 1546300801000L, 37.51, 100.000),
+        (20, 1546300804000L, 12.67, 300.000),
+        (10, 1546300807000L, 37.50, 200.000)).toDF("id","timestamp","price","quantity")
+
+    val prices = Seq((10, 1546300799000L, 37.50, 37.51),
+      (10, 1546300802000L, 37.51, 37.52),
+      (10, 1546300806000L, 37.50, 37.51)).toDF("id","timestamp","bid","ask")
+
+
+    val prices_new = prices.withColumnRenamed("id","prices_id")
+      .withColumnRenamed("timestamp","prices_timestamp")
+
+    val joinExpr = trades.col("timestamp") === prices_new.col("prices_timestamp")
+    val joinType = "full"
+
+    val out = trades.join(prices_new,joinExpr,joinType)
+
+    val out1 = out.withColumn("id1",when(col("id").isNull,col("prices_id"))
+    .otherwise(col("id")))
+      .withColumn("timestamp1",when(col("timestamp").isNull,col("prices_timestamp"))
+      .otherwise(col("timestamp")))
+      .drop("id").drop("timestamp").drop("prices_id").drop("prices_timestamp")
+      .withColumnRenamed("id1","id")
+      .withColumnRenamed("timestamp1","timestamp").orderBy("timestamp")
+
+    val window1 = Window.partitionBy("id").orderBy("timestamp")
+
+
+
+    val out2 = out1.withColumn("bid",
+      when(col("bid").isNull,last("bid",true).over(window1))
+    .otherwise(col("bid")))
+      .withColumn("ask",when(col("ask").isNull,last("ask",true).over(window1))
+        .otherwise(col("ask")))
+      .withColumn("price",when(col("price").isNull,last("price",true).over(window1))
+        .otherwise(col("price")))
+      .withColumn("quantity",when(col("quantity").isNull,last("quantity",true).over(window1))
+        .otherwise(col("quantity"))).orderBy("timestamp")
+      .select("id","timestamp","bid","ask","price","quantity")
+
+    val union1 = trades.withColumn("bid",lit(null))
+      .withColumn("ask",lit(null))
+      .unionByName(prices.withColumn("price",lit(null))
+        .withColumn("quantity",lit(null)))
+
+
+
+    val out3 = out2.groupBy("id","timestamp")
+      .pivot("id")
+      .agg(max(col("bid")),max(col("ask")),max(col("price")),max(col("quantity")))
+
+    val window2 = Window.orderBy("timestamp")
+
+    out3.withColumn("10_max(bid)",
+      when(col("10_max(bid)").isNull,lag("10_max(bid)",1).over(window2))
+        .otherwise(col("10_max(bid)")))
+      .withColumn("10_max(ask)",
+        when(col("10_max(ask)").isNull,lag("10_max(ask)",1).over(window2))
+          .otherwise(col("10_max(ask)")))
+      .withColumn("20_max(bid)",
+        when(col("20_max(bid)").isNull,lag("20_max(bid)",1).over(window2))
+          .otherwise(col("20_max(bid)")))
+      .withColumn("20_max(price)",
+        when(col("20_max(price)").isNull,last("20_max(price)",true).over(window2))
+          .otherwise(col("20_max(price)")))
+      .withColumn("20_max(quantity)",
+        when(col("20_max(quantity)").isNull,last("20_max(quantity)",true).over(window2))
+          .otherwise(col("20_max(quantity)")))
+      .orderBy("timestamp")
+      .show(false)
+
   }
 
 
